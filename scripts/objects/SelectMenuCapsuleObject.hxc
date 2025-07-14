@@ -1,0 +1,91 @@
+import flixel.FlxSprite;
+import openfl.geom.Rectangle;
+import funkin.modding.base.ScriptedFlxSpriteGroup;
+
+class SelectMenuCapsuleObject extends ScriptedFlxSpriteGroup {
+	public var outline:FlxSprite;
+	public var anchor:FlxSprite;
+	public var mainGraphic:FlxSprite;
+	public var titleImage:FlxSprite;
+	public var lockSprite:FlxSprite;
+
+
+
+	//If you just wanna make your own custom behavior for a capsule, don't mess with the new() function!
+	public function new(data:Dynamic, x:Float, y:Float) {
+		super();
+		var sillyColor = Std.parseInt(data.anchorColor);
+
+		outline = new FlxSprite();
+		outline.makeGraphic(220, 330, 0xFFFFFFFF);
+		outline.color = 0xFF000000;
+		outline.setPosition(x - 10, y - 15);
+		outline.scrollFactor.set(0,0);
+		add(outline);
+
+
+		// Anchor rectangle (capsule frame)
+		anchor = new FlxSprite().makeGraphic(200, 300, sillyColor);
+		anchor.setPosition(x, y);
+		anchor.scrollFactor.set(0, 0);
+		if (data.locked == true) anchor.alpha = 0.5;
+		add(anchor);
+
+		// Main user-defined graphic (inside frame)
+		mainGraphic = new FlxSprite();
+		mainGraphic.loadGraphic(data.graphic);
+		mainGraphic.scale.set(
+			data.graphicScale != null ? data.graphicScale : 1,
+			data.graphicScale != null ? data.graphicScale : 1
+		);
+		mainGraphic.setPosition(x, y - -100);
+		//mainGraphic.clipRect = new Rectangle(0, 0, 200, 300);
+		mainGraphic.scrollFactor.set(0, 0);
+		mainGraphic.updateHitbox();
+		if (data.locked == true) mainGraphic.alpha = 0.5;
+		add(mainGraphic);
+
+		// Title/logo image (optional, placed near top)
+		titleImage = new FlxSprite();
+		titleImage.loadGraphic(data.titleImage);
+		titleImage.scale.set(
+			data.titleScale != null ? data.titleScale : 1,
+			data.titleScale != null ? data.titleScale : 1
+		);
+		titleImage.setPosition(x + 10, y + 10);
+		titleImage.scrollFactor.set(0, 0);
+		titleImage.updateHitbox();
+		if (data.locked == true) titleImage.alpha = 0.5;
+		add(titleImage);
+
+		lockSprite = new FlxSprite();
+		lockSprite.loadGraphic(Paths.image('capsules/lock'));
+		lockSprite.setPosition(x,y);
+		lockSprite.scrollFactor.set(0,0);
+		lockSprite.updateHitbox();
+		if(data.locked == true) lockSprite.alpha = 1 else lockSprite.alpha = 0;
+		add(lockSprite);
+	}
+	
+	//TODO: Move to onSelect
+	public function setOutlineColor(hex:Int):Void {
+	if (outline != null) {
+		outline.color = hex;
+		trace('called');
+		trace(hex);
+		trace(outline.color);
+	}
+	
+}
+	/*These are your custom behavior functions.
+	*They do NOT take params as of now, not sure how to implement them :P
+	*Read the documentation for more info.
+	*/
+	public function onHover():Void {}
+
+	public function onSelect():Void {}
+
+	public function onDeselect():Void {}
+
+	public function onLockedSelect():Void {}
+}

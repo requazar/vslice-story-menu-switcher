@@ -1,0 +1,17 @@
+import funkin.modding.module.Module;
+import flixel.FlxG;
+import funkin.modding.base.ScriptedMusicBeatState;
+import funkin.ui.story.StoryMenuState;
+
+class SwitcherModule extends Module{
+    public function new(){
+        super('switcher-module');  
+    }
+
+    function onUpdate(){
+        if(FlxG.keys.justPressed.TAB && Std.isOfType(FlxG.state, StoryMenuState)){
+            var state = ScriptedMusicBeatState.init('StoryMenuSelectState');
+            FlxG.switchState(() -> state);
+        }
+    }
+}

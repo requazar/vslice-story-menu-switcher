@@ -1,0 +1,12 @@
+[
+  {
+    "titleImage": "assets/images/capsules/FNF_logo.png",
+    "titleScale": 0.12,
+    "graphic": "assets/images/capsules/BOYFRIEND_2.png",
+    "graphicScale": 0.49,
+    "state": "StoryMenuState",
+    "background": "assets/images/capsules/week1_remixed_stage.png",
+    "backgroundScale": 0.75,
+    "anchorColor": "0xFF50A5EB"
+  }
+]

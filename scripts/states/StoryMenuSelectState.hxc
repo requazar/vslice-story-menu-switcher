@@ -1,0 +1,162 @@
+import flixel.FlxState;
+import flixel.util.FlxTimer;
+import flixel.FlxG;
+import funkin.modding.base.ScriptedFlxSpriteGroup;
+import funkin.modding.base.ScriptedMusicBeatState;
+import haxe.Json;
+import flixel.FlxSprite;
+import funkin.ui.story.StoryMenuState;
+import funkin.save.Save;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+
+class StoryMenuSelectState extends ScriptedMusicBeatState {
+	var capsules:Array<Dynamic> = []; // parsed JSON data
+	var capsuleObjects:Array<Dynamic> = [];
+	var selectedIndex:Int = 0;
+	var scrollOffset:Float = 0;
+	var targetScrollOffset:Float = 0;
+	var spacing:Int = 350;
+	var bg:FlxSprite;
+	var lastBgPath:String = "";
+
+	override function create() {
+		super.create();
+		bg = new FlxSprite(0, 0);
+		add(bg);
+		loadCapsuleData(); // fill `capsules` array
+
+		for (i in 0...capsules.length) {
+			var capData = capsules[i];
+			var x = 150 + i * spacing;
+			var y = 140;
+
+			// Include position in the data object
+			capData.x = x;
+			capData.y = y;
+
+			// Load scripted capsule
+			var capsule = ScriptedFlxSpriteGroup.init(capData.script, capData);
+			add(capsule);
+			//capsule.mainGraphic.y += 500;
+			capsuleObjects.push(capsule);
+		}
+		updateBackground();
+	}
+
+	override function update(elapsed:Float):Void {
+		super.update(elapsed);
+
+		if (FlxG.keys.justPressed.RIGHT && selectedIndex < capsuleObjects.length - 1) {
+			capsuleObjects[selectedIndex].scriptCall("setOutlineColor", [0xFF000000]);
+			capsuleObjects[selectedIndex].scriptCall('onDeselect');
+			selectedIndex++;
+			updateBackground();
+			FunkinSound.playOnce(Paths.sound('scrollMenu'));
+		}
+		if (FlxG.keys.justPressed.LEFT && selectedIndex > 0) {
+			capsuleObjects[selectedIndex].scriptCall('setOutlineColor', [0xFF000000]);
+			capsuleObjects[selectedIndex].scriptCall('onDeselect');
+			selectedIndex--;
+			updateBackground();
+			FunkinSound.playOnce(Paths.sound('scrollMenu'));
+		}
+		if (FlxG.keys.justPressed.ENTER) {
+			if (capsules[selectedIndex].locked == true){
+				capsuleObjects[selectedIndex].scriptCall('onLockedSelect');
+				FlxG.camera.shake(0.01,0.2);
+				FunkinSound.playOnce(Paths.sound('incorrect-buzzer-noise'));
+			} else {
+				capsuleObjects[selectedIndex].scriptCall('onSelect');
+				var stateName = capsules[selectedIndex].state;
+				switchToStateByName(stateName);
+			}
+			
+			
+			
+		}
+
+		// Scroll logic
+		targetScrollOffset = selectedIndex * spacing - (FlxG.width / 2 - 100);
+		scrollOffset += (targetScrollOffset - scrollOffset) * 0.2;
+
+		// Position all capsules
+		for (i in 0...capsuleObjects.length) {
+			var x = 150 + i * spacing - scrollOffset;
+			var y = 140;
+			capsuleObjects[i].setPosition(x, y);
+		}
+	}
+
+	function switchToStateByName(name:String) {
+		switch (name) {
+			case "StoryMenuState": FlxG.switchState(new StoryMenuState());
+			default: ScriptedMusicBeatState.init(name);
+					 FlxG.switchState(() -> name);
+		}
+	}
+
+	function loadCapsuleData() {
+		var indexRaw = Assets.getText("assets/data/capsule_index.json");
+	var fileList:Dynamic = Json.parse(indexRaw); // fileList is an array of strings
+
+	capsules = [];
+
+	for (path in fileList) {
+		var raw = Assets.getText("assets/data/" + path);
+		var parsed:Dynamic = Json.parse(raw);
+
+		for (entry in parsed) {
+			var locked = false;
+			if (entry.requireType != null && entry.requireID != null) {
+				switch (entry.requireType) {
+					case "song":
+						locked = !Save.instance.hasBeatenSong(entry.requireID);
+					case "level":
+						locked = !Save.instance.hasBeatenLevel(entry.requireID);
+					default:
+						locked = false; // unknown type = not locked
+	}
+}
+			if (
+				entry != null &&
+				entry.titleImage != null &&
+				entry.graphic != null &&
+				entry.state != null &&
+				entry.background != null
+			) {
+				capsules.push({
+					titleImage: entry.titleImage,
+					titleScale: (entry.titleScale != null) ? entry.titleScale : 1,
+					graphic: entry.graphic,
+					graphicScale: (entry.graphicScale != null) ? entry.graphicScale : 1,
+					background: entry.background,
+					backgroundScale: (entry.backgroundScale != null) ? entry.backgroundScale : 1,
+					state: entry.state,
+					anchorColor: (entry.anchorColor != null) ? entry.anchorColor : 0xFF000000,
+					locked: locked,
+					script: (entry.script != null) ? entry.script : "SelectMenuCapsuleObject"
+				});
+			} else {
+				trace("Skipping invalid capsule in: " + path + " -> " + Std.string(entry));
+			}
+		}
+		//capsuleObjects.reverse();
+	}
+	}
+	function updateBackground():Void {
+	var currentData = capsules[selectedIndex];
+	var bgPath:String = currentData.background;
+
+	// Skip if it's already the current background
+	if (bgPath == lastBgPath || bgPath == null) return;
+
+	bg.loadGraphic(bgPath);
+	var scale:Float = currentData.backgroundScale != null ? currentData.backgroundScale : 1;
+	bg.scale.set(scale, scale);
+	bg.updateHitbox();
+	lastBgPath = bgPath;
+	capsuleObjects[selectedIndex].scriptCall('setOutlineColor', [0xFFFFFFFF]);
+	capsuleObjects[selectedIndex].scriptCall('onHover');
+}
+}
