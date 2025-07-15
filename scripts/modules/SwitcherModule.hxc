@@ -2,6 +2,7 @@ import funkin.modding.module.Module;
 import flixel.FlxG;
 import funkin.modding.base.ScriptedMusicBeatState;
 import funkin.ui.story.StoryMenuState;
+import flixel.text.FlxText;
 
 class SwitcherModule extends Module{
     public function new(){
@@ -13,5 +14,18 @@ class SwitcherModule extends Module{
             var state = ScriptedMusicBeatState.init('StoryMenuSelectState');
             FlxG.switchState(() -> state);
         }
+    }
+    override function onStateChangeEnd(event:StateChangeScriptEvent):Void{
+        if (event.targetState is StoryMenuState)
+    {
+      event.targetState.modeText = new FlxText(10, 10, 0, 'Base Game Levels [TAB or TAP BF to switch]');
+      event.targetState.modeText.setFormat('VCR OSD Mono', 32);
+      event.targetState.modeText.screenCenter(0x01);
+      event.targetState.modeText.visible = true;
+      event.targetState.modeText.zIndex = 1000;
+      event.targetState.add(event.targetState.modeText);
+      event.targetState.refresh();
+    //   switchMode(false);
+    }
     }
 }

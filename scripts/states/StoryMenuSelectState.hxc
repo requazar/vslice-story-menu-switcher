@@ -19,11 +19,37 @@ class StoryMenuSelectState extends ScriptedMusicBeatState {
 	var spacing:Int = 350;
 	var bg:FlxSprite;
 	var lastBgPath:String = "";
+	var btnLeft:FlxSprite;
+	var btnRight:FlxSprite;
+	var btnSelect:FlxSprite;
+	// var leftPressed;
+	// var rightPressed;
+	// var selectPressed;
+	
 
 	override function create() {
 		super.create();
+		// leftPressed = FlxG.keys.justPressed.LEFT || (FlxG.mouse.overlaps(btnLeft) && FlxG.mouse.justPressed);
+		// rightPressed = FlxG.keys.justPressed.RIGHT || FlxG.mouse.overlaps(btnRight) && FlxG.mouse.justPressed;
+		// selectPressed = FlxG.keys.justPressed.ENTER || FlxG.mouse.overlaps(btnSelect) && FlxG.mouse.justPressed;
 		bg = new FlxSprite(0, 0);
 		add(bg);
+		btnLeft = new FlxSprite(FlxG.width/10, FlxG.height/2);
+		btnLeft.loadGraphic("assets/images/ui/left.png");
+		btnLeft.setGraphicSize(64, 64);
+		btnLeft.updateHitbox();
+		add(btnLeft);
+		var btnRight = new FlxSprite(FlxG.width - 64, FlxG.height/2);
+		btnRight.loadGraphic("assets/images/ui/right.png");
+		btnRight.setGraphicSize(64, 64);
+		btnRight.updateHitbox();
+		add(btnRight);
+		btnSelect = new FlxSprite(FlxG.width/2 + 100, FlxG.height - 64);
+		btnSelect.loadGraphic("assets/images/ui/select.png");
+		btnSelect.setGraphicSize(64, 64);
+		btnSelect.updateHitbox();
+		add(btnSelect);
+
 		loadCapsuleData(); // fill `capsules` array
 
 		for (i in 0...capsules.length) {
@@ -47,21 +73,21 @@ class StoryMenuSelectState extends ScriptedMusicBeatState {
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 
-		if (FlxG.keys.justPressed.RIGHT && selectedIndex < capsuleObjects.length - 1) {
+		if ((FlxG.keys.justPressed.RIGHT || ( btnRight != null && (btnRight.overlapsPoint(FlxG.mouse.getScreenPosition()) && FlxG.mouse.justPressed)))&& selectedIndex < capsuleObjects.length - 1) {
 			capsuleObjects[selectedIndex].scriptCall("setOutlineColor", [0xFF000000]);
 			capsuleObjects[selectedIndex].scriptCall('onDeselect');
 			selectedIndex++;
 			updateBackground();
 			FunkinSound.playOnce(Paths.sound('scrollMenu'));
 		}
-		if (FlxG.keys.justPressed.LEFT && selectedIndex > 0) {
+		if ((FlxG.keys.justPressed.LEFT || (btnLeft != null && (btnLeft.overlapsPoint(FlxG.mouse.getScreenPosition()) && FlxG.mouse.justPressed))) && selectedIndex > 0) {
 			capsuleObjects[selectedIndex].scriptCall('setOutlineColor', [0xFF000000]);
 			capsuleObjects[selectedIndex].scriptCall('onDeselect');
 			selectedIndex--;
 			updateBackground();
 			FunkinSound.playOnce(Paths.sound('scrollMenu'));
 		}
-		if (FlxG.keys.justPressed.ENTER) {
+		if (FlxG.keys.justPressed.ENTER || (btnSelect != null && (btnSelect.overlapsPoint(FlxG.mouse.getScreenPosition()) && FlxG.mouse.justPressed))) {
 			if (capsules[selectedIndex].locked == true){
 				capsuleObjects[selectedIndex].scriptCall('onLockedSelect');
 				FlxG.camera.shake(0.01,0.2);
@@ -158,5 +184,8 @@ class StoryMenuSelectState extends ScriptedMusicBeatState {
 	lastBgPath = bgPath;
 	capsuleObjects[selectedIndex].scriptCall('setOutlineColor', [0xFFFFFFFF]);
 	capsuleObjects[selectedIndex].scriptCall('onHover');
+	// btnLeft.color = capsules[selectedIndex].anchorColor;
+	// btnRight.color = capsules[selectedIndex].anchorColor;
+	// btnSelect.color = capsules[selectedIndex].anchorColor;
 }
 }
