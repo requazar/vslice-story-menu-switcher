@@ -2,7 +2,7 @@ import flixel.FlxState;
 import flixel.util.FlxTimer;
 import flixel.FlxG;
 import funkin.modding.base.ScriptedFlxSpriteGroup;
-import funkin.modding.base.ScriptedMusicBeatState;
+import funkin.modding.base.ScriptedFlxState;
 import haxe.Json;
 import flixel.FlxSprite;
 import funkin.ui.story.StoryMenuState;
@@ -10,7 +10,7 @@ import funkin.save.Save;
 import funkin.Paths;
 import funkin.audio.FunkinSound;
 
-class StoryMenuSelectState extends ScriptedMusicBeatState {
+class StoryMenuSelectState extends ScriptedFlxState {
 	var capsules:Array<Dynamic> = []; // parsed JSON data
 	var capsuleObjects:Array<Dynamic> = [];
 	var selectedIndex:Int = 0;
@@ -117,7 +117,7 @@ class StoryMenuSelectState extends ScriptedMusicBeatState {
 	function switchToStateByName(name:String) {
 		switch (name) {
 			case "StoryMenuState": FlxG.switchState(new StoryMenuState());
-			default: ScriptedMusicBeatState.init(name);
+			default: ScriptedFlxState.init(name);
 					 FlxG.switchState(() -> name);
 		}
 	}

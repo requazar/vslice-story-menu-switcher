@@ -1,6 +1,6 @@
 import funkin.modding.module.Module;
 import flixel.FlxG;
-import funkin.modding.base.ScriptedMusicBeatState;
+import funkin.modding.base.ScriptedFlxState;
 import funkin.ui.story.StoryMenuState;
 import flixel.text.FlxText;
 
@@ -11,8 +11,12 @@ class SwitcherModule extends Module{
 
     function onUpdate(){
         if(FlxG.keys.justPressed.TAB && Std.isOfType(FlxG.state, StoryMenuState)){
-            var state = ScriptedMusicBeatState.init('StoryMenuSelectState');
+            var state = ScriptedFlxState.init('StoryMenuSelectState');
             FlxG.switchState(() -> state);
+        }
+
+        if(Std.isOfType(FlxG.state, StoryMenuState) && StoryMenuState.levelProps != null && StoryMenuState.levelProps.overlaps(FlxG.getScreenPosition()) && FlxG.mouse.justPressed){
+
         }
     }
     override function onStateChangeEnd(event:StateChangeScriptEvent):Void{
